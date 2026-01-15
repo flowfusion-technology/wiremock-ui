@@ -12,6 +12,7 @@ COPY . .
 # Build for production with legacy OpenSSL support
 ENV NODE_OPTIONS=--openssl-legacy-provider
 ENV SKIP_PREFLIGHT_CHECK=true
+ENV PUBLIC_URL=/ui
 RUN yarn build
 
 # Verify build was successful
@@ -23,13 +24,19 @@ FROM nginx:alpine
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Configure nginx for React Router
+# Configure nginx for React Router with base path /ui
 RUN echo 'server { \
     listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
+    location /ui { \
+        alias /usr/share/nginx/html; \
         index index.html; \
-        try_files $uri $uri/ /index.html; \
+        try_files $uri $uri/ /ui/index.html; \
+    } \
+    location = /ui { \
+        return 301 /ui/; \
+    } \
+    location / { \
+        return 301 /ui/; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
