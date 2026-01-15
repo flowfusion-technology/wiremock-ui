@@ -15,7 +15,7 @@ export const getColorForStatus = (colors: IThemeColors, status?: 'ok' | 'ko' | '
         return colors.accent
     }
 
-    return colors[mapping[status]]
+    return (colors as any)[mapping[status]]
 }
 
 

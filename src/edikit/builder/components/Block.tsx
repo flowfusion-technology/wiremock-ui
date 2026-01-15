@@ -94,7 +94,7 @@ class Block extends React.Component<IBlockProps> {
             return null
         }
 
-        let markerColor = theme.colors[markerColorKey!]
+        let markerColor = (theme.colors as any)[markerColorKey!]
         if (markerColor === undefined) {
             markerColor = markerColorKey
         }

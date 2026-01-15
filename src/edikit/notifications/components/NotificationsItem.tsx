@@ -4,7 +4,7 @@ import { IThemeColors } from '../../theming/types'
 import { INotification, NotificationType } from '../types'
 
 const colorByNotificationType = (colors: IThemeColors, type: NotificationType): string => {
-    return colors[type] || colors.accent
+    return (colors as any)[type] || colors.accent
 }
 
 interface IItemProps {
