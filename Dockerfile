@@ -1,34 +1,16 @@
-FROM node:22-alpine as builder
+FROM node:22-alpine
 
 WORKDIR /app
-RUN apk add --no-cache \
-    git \
-    bash
 
-COPY *.json yarn.lock ./
+RUN apk add --no-cache git bash
+
+COPY package.json yarn.lock ./
 RUN yarn install
 
-COPY /src /app/src
-COPY /public /app/public
+COPY . .
 
-# Build for production (skip TypeScript errors)
-RUN SKIP_PREFLIGHT_CHECK=true yarn build || true
+ENV SKIP_PREFLIGHT_CHECK=true
 
-# Production stage with nginx
-FROM nginx:alpine
+EXPOSE 3000
 
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Configure nginx for React Router
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["yarn", "start"]

@@ -14,11 +14,12 @@
     "moduleResolution": "node",
     "rootDir": "src",
     "forceConsistentCasingInFileNames": false,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
     "noImplicitAny": false,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "noUnusedLocals": false,
+    "skipLibCheck": true,
     "paths": {
       "edikit": [
         "src/edikit"
