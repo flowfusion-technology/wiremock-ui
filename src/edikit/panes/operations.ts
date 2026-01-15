@@ -97,6 +97,7 @@ export const addContentToCurrentPane = <Data>(
         throw new Error('unable to find a current pane')
     }
 
+    // @ts-ignore - Type inference issue
     const existingContent = currentPane.contents.find(
         content => content.id === newContent.id
     )
