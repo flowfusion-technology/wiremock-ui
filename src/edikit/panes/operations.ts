@@ -148,7 +148,7 @@ export const setPaneCurrentContent = <Data>(
     contentId: string
 ): Array<IPane<Data>> => {
     const currentPane = panesNsCurrentPaneSelector<Data>(panes)
-    if (currentPane !== undefined && currentPane.id === paneId) {
+    if (currentPane && currentPane.id === paneId) {
         const currentContent = currentPane.contents.find(
             content => content.isCurrent
         )

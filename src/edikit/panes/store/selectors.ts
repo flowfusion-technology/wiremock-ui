@@ -24,7 +24,7 @@ export const panesCurrentPaneSelector = <Data>(
     namespace: string
 ): IPane<Data> | void => {
     const namespaceState = panesNamespaceSelector(state, namespace)
-    if (namespaceState === undefined) return
+    if (!namespaceState) return
 
     return panesNsCurrentPaneSelector(namespaceState.panes)
 }
@@ -46,7 +46,7 @@ export const panesPaneSelector = <Data>(
     paneId: string
 ): IPane<Data> | void => {
     const namespaceState = panesNamespaceSelector(state, namespace)
-    if (namespaceState === undefined) return
+    if (!namespaceState) return
 
     return panesNsPaneSelector(namespaceState.panes, paneId)
 }
@@ -83,7 +83,7 @@ export const panesContentSelector = <Data>(
     contentId: string
 ): IPanesContentSelection<Data> | void => {
     const namespaceState = panesNamespaceSelector(state, namespace)
-    if (namespaceState === undefined) return
+    if (!namespaceState) return
 
     return panesNsContentSelector(namespaceState.panes, contentId)
 }
@@ -115,7 +115,7 @@ export const panesCurrentContentsSelector = <Data>(
     namespace: string,
 ): Array<IPaneContent<Data>> => {
     const namespaceState = panesNamespaceSelector(state, namespace)
-    if (namespaceState === undefined) return []
+    if (!namespaceState) return []
 
     return panesNsCurrentContentsSelector(namespaceState.panes)
 }
