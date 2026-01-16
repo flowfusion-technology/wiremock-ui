@@ -37,11 +37,8 @@ export const loadStateEpic: Epic<IAction, any> = action$ =>
                             }
                         }
                     } catch (e) {
-                        // Config file not found or invalid, fallback to env vars
-                        console.log('Config file not found, using environment variables')
                     }
 
-                    // Fallback to environment variables if config not available
                     if (!defaultServer) {
                         const defaultName = process.env.REACT_APP_WIREMOCK_NAME
                         const defaultUrl = process.env.REACT_APP_WIREMOCK_URL
