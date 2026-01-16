@@ -1,6 +1,6 @@
 import { Epic, combineEpics } from 'redux-observable'
-import { from } from 'rxjs'
-import { mergeMap, switchMap } from 'rxjs/operators'
+import { from, of } from 'rxjs'
+import { mergeMap, switchMap, flatMap } from 'rxjs/operators'
 import { initSettings } from '../../settings'
 import { initServers } from '../../servers'
 import { IAction } from '../../../store'
@@ -27,17 +27,24 @@ export const loadStateEpic: Epic<IAction, any> = action$ =>
                 const loadDefaultServerPromise = async () => {
                     let defaultServer: any = null
 
-                    // Try to load from config.json first
+                    // Try to load from config.json first (non-blocking, with timeout)
                     try {
-                        const configResponse = await fetch(`${process.env.PUBLIC_URL || ''}/config.json`)
-                        if (configResponse.ok) {
+                        const configUrl = `${process.env.PUBLIC_URL || ''}/config.json`
+                        // Use Promise.race to add timeout
+                        const timeoutPromise = new Promise<never>((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout')), 1000)
+                        )
+                        const fetchPromise = fetch(configUrl, { cache: 'no-cache' })
+                        const configResponse = await Promise.race([fetchPromise, timeoutPromise])
+                        if (configResponse && configResponse.ok) {
                             const config = await configResponse.json()
                             if (config.defaultServer && config.defaultServer.name) {
                                 defaultServer = config.defaultServer
                             }
                         }
                     } catch (e) {
-                        // Config file not found or invalid, fallback to environment variables
+                        // Config file not found, timeout, or invalid - fallback to environment variables
+                        // Don't block app loading - continue silently
                     }
 
                     if (!defaultServer) {
@@ -111,7 +118,9 @@ export const loadStateEpic: Epic<IAction, any> = action$ =>
                     ]
                 }
 
-                return from(loadDefaultServerPromise())
+                return from(loadDefaultServerPromise()).pipe(
+                    mergeMap((actionArray) => from(actionArray))
+                )
             })
         )
 

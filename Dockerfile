@@ -31,31 +31,38 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    # Serve config.json and other static files \
-    location /ui/config.json { \
+    # Serve config.json \
+    location = /ui/config.json { \
         alias /usr/share/nginx/html/config.json; \
         add_header Cache-Control "no-cache"; \
     } \
     \
-    # Serve static assets \
-    location /ui/static { \
-        alias /usr/share/nginx/html/static; \
+    # Serve static assets (JS, CSS) - must come before /ui/ location \
+    location ~ ^/ui/static/ { \
+        alias /usr/share/nginx/html/static/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
     } \
     \
-    # Main UI location \
-    location /ui { \
-        alias /usr/share/nginx/html; \
+    # Serve other static files (favicon, manifest) \
+    location ~ ^/ui/(favicon\.ico|manifest\.json)$ { \
+        alias /usr/share/nginx/html/$1; \
+        expires 1y; \
+    } \
+    \
+    # Main UI location - serve React app \
+    location /ui/ { \
+        alias /usr/share/nginx/html/; \
         try_files $uri $uri/ /ui/index.html; \
     } \
     \
-    # Redirect root to /ui \
+    # Redirect /ui to /ui/ \
     location = /ui { \
         return 301 /ui/; \
     } \
     \
-    location / { \
+    # Redirect root to /ui/ \
+    location = / { \
         return 301 /ui/; \
     } \
 }' > /etc/nginx/conf.d/default.conf

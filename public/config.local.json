@@ -1,0 +1,8 @@
+{
+  "defaultServer": {
+    "name": "Platform Mock Hub (Local)",
+    "url": "http://localhost:8080",
+    "port": null
+  },
+  "_comment": "Local development config - use this for testing on localhost"
+}
