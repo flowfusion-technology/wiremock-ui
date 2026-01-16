@@ -1,0 +1,8 @@
+{
+  "defaultServer": {
+    "name": "Platform Mock Hub",
+    "url": "https://dev-platform-mock.testme.work",
+    "port": null
+  },
+  "_comment": "WireMock API URL. If url is empty, it will use the same origin as the UI automatically."
+}

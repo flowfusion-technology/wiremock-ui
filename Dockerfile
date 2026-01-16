@@ -28,14 +28,33 @@ COPY --from=builder /app/build /usr/share/nginx/html
 # Configure nginx for React Router with base path /ui
 RUN echo 'server { \
     listen 80; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    \
+    # Serve config.json and other static files \
+    location /ui/config.json { \
+        alias /usr/share/nginx/html/config.json; \
+        add_header Cache-Control "no-cache"; \
+    } \
+    \
+    # Serve static assets \
+    location /ui/static { \
+        alias /usr/share/nginx/html/static; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+    \
+    # Main UI location \
     location /ui { \
         alias /usr/share/nginx/html; \
-        index index.html; \
         try_files $uri $uri/ /ui/index.html; \
     } \
+    \
+    # Redirect root to /ui \
     location = /ui { \
         return 301 /ui/; \
     } \
+    \
     location / { \
         return 301 /ui/; \
     } \
