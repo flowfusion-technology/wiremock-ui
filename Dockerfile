@@ -25,6 +25,12 @@ RUN test -f /app/build/index.html || (echo "Build failed - no index.html" && exi
 RUN sed -i'' 's|http://\([^"]*\)|https://\1|g' /app/build/index.html 2>/dev/null || \
     sed -i 's|http://\([^"]*\)|https://\1|g' /app/build/index.html || true
 
+# Fix trailing slashes in static asset URLs (e.g., .js/ -> .js)
+RUN sed -i'' 's|\(\.js\)/\(["\s>]\)|\1\2|g' /app/build/index.html 2>/dev/null || \
+    sed -i 's|\(\.js\)/\(["\s>]\)|\1\2|g' /app/build/index.html || true
+RUN sed -i'' 's|\(\.css\)/\(["\s>]\)|\1\2|g' /app/build/index.html 2>/dev/null || \
+    sed -i 's|\(\.css\)/\(["\s>]\)|\1\2|g' /app/build/index.html || true
+
 # Production stage with nginx
 FROM nginx:alpine
 
@@ -40,6 +46,11 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-Frame-Options "SAMEORIGIN" always; \
     \
+    # Remove trailing slashes from static file requests \
+    location ~ ^(/ui/static/.+\.(js|css))/$ { \
+        return 301 $1; \
+    } \
+    \
     # Serve config.json \
     location = /ui/config.json { \
         alias /usr/share/nginx/html/config.json; \
@@ -47,12 +58,31 @@ RUN echo 'server { \
         add_header Content-Type "application/json"; \
     } \
     \
-    # Serve static assets (JS, CSS) - must come before /ui/ location \
-    location ~ ^/ui/static/ { \
-        alias /usr/share/nginx/html/static/; \
+    # Serve static JS files \
+    location ~ ^/ui/static/js/(.+\.js)$ { \
+        alias /usr/share/nginx/html/static/js/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "application/javascript; charset=utf-8"; \
         add_header X-Content-Type-Options "nosniff" always; \
+        access_log off; \
+    } \
+    \
+    # Serve static CSS files \
+    location ~ ^/ui/static/css/(.+\.css)$ { \
+        alias /usr/share/nginx/html/static/css/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "text/css; charset=utf-8"; \
+        access_log off; \
+    } \
+    \
+    # Serve other static files in static/ directory \
+    location ~ ^/ui/static/(.+)$ { \
+        alias /usr/share/nginx/html/static/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        access_log off; \
     } \
     \
     # Serve other static files (favicon, manifest) \
