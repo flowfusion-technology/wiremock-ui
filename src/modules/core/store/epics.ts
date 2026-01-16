@@ -63,7 +63,7 @@ export const loadStateEpic: Epic<IAction, any> = action$ =>
 
                             defaultServer = {
                                 name: defaultName,
-                                url: url,
+                                url,
                                 port: defaultPort
                             }
                         }
