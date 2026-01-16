@@ -46,21 +46,16 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-Frame-Options "SAMEORIGIN" always; \
     \
-    # Remove trailing slashes from static file requests \
-    location ~ ^(/ui/static/.+\.(js|css))/$ { \
-        return 301 $1; \
-    } \
-    \
-    # Serve config.json \
+    # Serve config.json (exact match has highest priority) \
     location = /ui/config.json { \
         alias /usr/share/nginx/html/config.json; \
         add_header Cache-Control "no-cache"; \
         add_header Content-Type "application/json"; \
     } \
     \
-    # Serve static JS files \
-    location ~ ^/ui/static/js/(.+\.js)$ { \
-        alias /usr/share/nginx/html/static/js/$1; \
+    # Serve static JS files - use ^~ to give prefix match priority \
+    location ^~ /ui/static/js/ { \
+        alias /usr/share/nginx/html/static/js/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         add_header Content-Type "application/javascript; charset=utf-8"; \
@@ -69,8 +64,8 @@ RUN echo 'server { \
     } \
     \
     # Serve static CSS files \
-    location ~ ^/ui/static/css/(.+\.css)$ { \
-        alias /usr/share/nginx/html/static/css/$1; \
+    location ^~ /ui/static/css/ { \
+        alias /usr/share/nginx/html/static/css/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         add_header Content-Type "text/css; charset=utf-8"; \
@@ -78,8 +73,8 @@ RUN echo 'server { \
     } \
     \
     # Serve other static files in static/ directory \
-    location ~ ^/ui/static/(.+)$ { \
-        alias /usr/share/nginx/html/static/$1; \
+    location ^~ /ui/static/ { \
+        alias /usr/share/nginx/html/static/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         access_log off; \
