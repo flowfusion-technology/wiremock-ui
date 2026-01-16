@@ -37,6 +37,7 @@ export const loadStateEpic: Epic<IAction, any> = action$ =>
                             }
                         }
                     } catch (e) {
+                        // Config file not found or invalid, fallback to environment variables
                     }
 
                     if (!defaultServer) {
