@@ -20,6 +20,11 @@ RUN yarn build
 RUN test -d /app/build || (echo "Build failed - no build directory" && exit 1)
 RUN test -f /app/build/index.html || (echo "Build failed - no index.html" && exit 1)
 
+# Fix Mixed Content: Replace HTTP URLs with HTTPS in index.html
+# Use -i'' for Alpine's sed (busybox sed)
+RUN sed -i'' 's|http://\([^"]*\)|https://\1|g' /app/build/index.html 2>/dev/null || \
+    sed -i 's|http://\([^"]*\)|https://\1|g' /app/build/index.html || true
+
 # Production stage with nginx
 FROM nginx:alpine
 
@@ -31,10 +36,15 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     \
+    # Security headers to prevent Mixed Content \
+    add_header X-Content-Type-Options "nosniff" always; \
+    add_header X-Frame-Options "SAMEORIGIN" always; \
+    \
     # Serve config.json \
     location = /ui/config.json { \
         alias /usr/share/nginx/html/config.json; \
         add_header Cache-Control "no-cache"; \
+        add_header Content-Type "application/json"; \
     } \
     \
     # Serve static assets (JS, CSS) - must come before /ui/ location \
@@ -42,6 +52,7 @@ RUN echo 'server { \
         alias /usr/share/nginx/html/static/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        add_header X-Content-Type-Options "nosniff" always; \
     } \
     \
     # Serve other static files (favicon, manifest) \
@@ -54,6 +65,8 @@ RUN echo 'server { \
     location /ui/ { \
         alias /usr/share/nginx/html/; \
         try_files $uri $uri/ /ui/index.html; \
+        add_header Cache-Control "no-cache"; \
+        add_header Content-Security-Policy "upgrade-insecure-requests" always; \
     } \
     \
     # Redirect /ui to /ui/ \
