@@ -1,5 +1,6 @@
 FROM node:22-alpine as builder
 
+# Force rebuild trigger - 1
 WORKDIR /app
 
 RUN apk add --no-cache git bash
