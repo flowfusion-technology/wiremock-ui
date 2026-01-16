@@ -14,14 +14,14 @@ export const getMapping = (server: IServer, mappingId: string) =>
 export const createMapping = (server: IServer, mapping: Partial<IMapping>) =>
     ajax.post(
         buildApiUrl(server, '/mappings'),
-        mapping,
+        { ...mapping, persistent: true },
         { 'Content-Type': 'application/json' }
     )
 
 export const updateMapping = (server: IServer, mapping: IMapping) =>
     ajax.put(
         buildApiUrl(server, `/mappings/${mapping.id}`),
-        mapping,
+        { ...mapping, persistent: true },
         { 'Content-Type': 'application/json' }
     )
 
