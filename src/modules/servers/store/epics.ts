@@ -14,6 +14,21 @@ export const createServerEpic: Epic<ServersAction, any, IApplicationState> = act
             ))
         )
 
+export const saveServersEpic: Epic<ServersAction, any, IApplicationState> = (action$, state$) =>
+    action$.ofType(
+        ServersActionTypes.CREATE_SERVER,
+        ServersActionTypes.UPDATE_SERVER,
+        ServersActionTypes.REMOVE_SERVER
+    )
+        .pipe(
+            mergeMap(() => {
+                const { servers } = state$.value.servers
+                localStorage.setItem('servers', JSON.stringify(servers))
+                return of()
+            })
+        )
+
 export const serversEpic = combineEpics(
-    createServerEpic
+    createServerEpic,
+    saveServersEpic
 )
